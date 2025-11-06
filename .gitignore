@@ -1,0 +1,8 @@
+*
+
+!/Core/Src/*
+!/Core/Inc/*
+!VFD_Controller.ioc
+!STM32F407VETX_RAM.ld
+!STM32F407VETX_FLASH.ld
+!.gitignore
