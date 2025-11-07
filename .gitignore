@@ -1,8 +1,14 @@
+# Ignore everything
 *
 
-!/Core/Src/*
-!/Core/Inc/*
+# Allow directories to be traversed
+!*/
+Core/Startup/startup_stm32f407vetx.s
+
+# Unignore specific directories and files
+!Core/**
 !VFD_Controller.ioc
 !STM32F407VETX_RAM.ld
 !STM32F407VETX_FLASH.ld
 !.gitignore
+
