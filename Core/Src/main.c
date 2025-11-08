@@ -96,12 +96,25 @@ int main(void) {
 	/* USER CODE BEGIN WHILE */
 	mmodbus_writeHoldingRegister16i(16, 40960, 1);
 
-	uint32_t last_time = HAL_GetTick();
+	/*uint32_t last_time = HAL_GetTick();
 	int32_t freq=0;
-	int32_t step=1000;
+	int32_t step=1000;*/
+	vfd_context_t ctx;
+    ctx.slave_address = 16;  // From your example
+    ctx.mb_write_single_reg = my_mb_write_single_reg;
+    ctx.mb_write_multi_reg = NULL;  // If not used
+    ctx.mb_read_single_reg = my_mb_read_single_reg;
+    ctx.mb_read_multi_reg = my_mb_read_multi_reg;
+
+    vfd_t vfd;
+    vfd_init(&vfd, &ctx, &delixi_default_config);  // Use default Delixi config
+
+    // Example control
+    vfd_set_running_freq(&vfd, 50.0);  // 50 Hz
 	while (1) {
 
 		/* USER CODE END WHILE */
+		vfd_update(&vfd);//reads all registers and updates the internal data.
 		uint32_t now = HAL_GetTick();
 
 		if (now - last_time > 500) {
