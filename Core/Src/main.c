@@ -18,12 +18,14 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "usart.h"
+
 #include "gpio.h"
+#include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "mmodbus.h"
+#include "vfd_controller.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -63,7 +65,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
  * @retval int
  */
 int main(void) {
-
 	/* USER CODE BEGIN 1 */
 
 	/* USER CODE END 1 */
@@ -99,37 +100,32 @@ int main(void) {
 	/*uint32_t last_time = HAL_GetTick();
 	int32_t freq=0;
 	int32_t step=1000;*/
-	vfd_context_t ctx;
-    ctx.slave_address = 16;  // From your example
-    ctx.mb_write_single_reg = my_mb_write_single_reg;
-    ctx.mb_write_multi_reg = NULL;  // If not used
-    ctx.mb_read_single_reg = my_mb_read_single_reg;
-    ctx.mb_read_multi_reg = my_mb_read_multi_reg;
+	vfd_context_t ctx;-
+	ctx.slave_address = 16;	 // From your example
+	ctx.mb_write_single_reg = my_mb_write_single_reg;
+	ctx.mb_write_multi_reg = NULL;	// If not used
+	ctx.mb_read_single_reg = my_mb_read_single_reg;
+	ctx.mb_read_multi_reg = my_mb_read_multi_reg;
 
-    vfd_t vfd;
-    vfd_init(&vfd, &ctx, &delixi_default_config);  // Use default Delixi config
+	vfd_t vfd;
+	vfd_init(&vfd, &ctx, &delixi_default_config);  // Use default Delixi config
 
-    // Example control
-    vfd_set_running_freq(&vfd, 50.0);  // 50 Hz
+	// Example control
+	vfd_set_running_freq(&vfd, 50.0);  // 50 Hz
 	while (1) {
-
 		/* USER CODE END WHILE */
-		vfd_update(&vfd);//reads all registers and updates the internal data.
+		vfd_update(&vfd);  // reads all registers and updates the internal data.
 		uint32_t now = HAL_GetTick();
 
 		if (now - last_time > 500) {
-
-			mmodbus_writeHoldingRegister16i(16, 40961, freq);
+			set_running_freq()
 			freq += step;
 
-			if(freq>=9990)
-				step=-1000;
+			if (freq >= 9990) step = -1000;
 
-			if(freq<5)
-				step=1000;
+			if (freq < 5) step = 1000;
 
 			last_time = now;
-
 		}
 
 		/* USER CODE BEGIN 3 */
@@ -142,8 +138,8 @@ int main(void) {
  * @retval None
  */
 void SystemClock_Config(void) {
-	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
-	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
+	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
 	/** Configure the main internal regulator output voltage
 	 */
@@ -167,8 +163,8 @@ void SystemClock_Config(void) {
 
 	/** Initializes the CPU, AHB and APB buses clocks
 	 */
-	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
-			| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.ClockType =
+		RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
@@ -180,9 +176,7 @@ void SystemClock_Config(void) {
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-	mmodbus_callback();
-}
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) { mmodbus_callback(); }
 
 /* USER CODE END 4 */
 
@@ -200,17 +194,16 @@ void Error_Handler(void) {
 }
 #ifdef USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line)
-{
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
+void assert_failed(uint8_t *file, uint32_t line) {
+	/* USER CODE BEGIN 6 */
+	/* User can add his own implementation to report the file name and line number,
+	   ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+	/* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

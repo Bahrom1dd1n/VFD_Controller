@@ -4,7 +4,6 @@
 # Allow directories to be traversed
 !*/
 Core/Startup/startup_stm32f407vetx.s
-
 # Unignore specific directories and files
 !Core/**
 !VFD_Controller.ioc
