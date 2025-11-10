@@ -53,6 +53,10 @@
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+// Modbus wrapper prototypes (to fix undeclared errors)
+vfd_issue my_mb_write_single_reg(uint16_t slave, uint16_t addr, uint16_t val);
+vfd_issue my_mb_read_single_reg(uint16_t slave, uint16_t addr, uint16_t *val);
+vfd_issue my_mb_read_multi_reg(uint16_t slave, uint16_t addr, uint16_t count, uint16_t *buf);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -100,30 +104,32 @@ int main(void) {
 	/*uint32_t last_time = HAL_GetTick();
 	int32_t freq=0;
 	int32_t step=1000;*/
-	vfd_context_t ctx;-
-	ctx.slave_address = 16;	 // From your example
+	vfd_context_t ctx;
+	ctx.slave_address = 16;
 	ctx.mb_write_single_reg = my_mb_write_single_reg;
 	ctx.mb_write_multi_reg = NULL;	// If not used
 	ctx.mb_read_single_reg = my_mb_read_single_reg;
 	ctx.mb_read_multi_reg = my_mb_read_multi_reg;
 
-	vfd_t vfd;
-	vfd_init(&vfd, &ctx, &delixi_default_config);  // Use default Delixi config
+	vfd_init(&ctx);  // Use default Delixi config
 
 	// Example control
-	vfd_set_running_freq(&vfd, 50.0);  // 50 Hz
+	vfd_set_running_freq(&ctx, 50.0);  // 50 %
+	uint32_t last_time = HAL_GetTick();
+	float freq = 0;  // Start at 0 (0.00%)
+	int32_t step = 1;  // 10.00% step (1000 * 0.01 = 10%)
 	while (1) {
 		/* USER CODE END WHILE */
-		vfd_update(&vfd);  // reads all registers and updates the internal data.
+		vfd_update(&ctx);  // reads all registers and updates the internal data.
 		uint32_t now = HAL_GetTick();
 
 		if (now - last_time > 500) {
-			set_running_freq()
+			vfd_set_running_freq(&ctx, freq);
 			freq += step;
 
-			if (freq >= 9990) step = -1000;
+			if (freq >= 99) step = -1;
 
-			if (freq < 5) step = 1000;
+			if (freq < 5) step = 1;
 
 			last_time = now;
 		}
@@ -177,6 +183,22 @@ void SystemClock_Config(void) {
 
 /* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) { mmodbus_callback(); }
+
+// Modbus wrapper functions (implement based on mmodbus API; assume it returns 0 on success)
+vfd_issue my_mb_write_single_reg(uint16_t slave, uint16_t addr, uint16_t val) {
+    int result = mmodbus_writeHoldingRegister16i(slave, addr, val);
+    return (result == 0) ? VFD_SUCCESS : VFD_ERROR_MODBUS_FAIL;  // Adjust if mmodbus returns error codes
+}
+
+vfd_issue my_mb_read_single_reg(uint16_t slave, uint16_t addr, uint16_t *val) {
+    int result = mmodbus_readHoldingRegister16i(slave, addr, val);  // Assume this exists in mmodbus.h
+    return (result == 0) ? VFD_SUCCESS : VFD_ERROR_MODBUS_FAIL;
+}
+
+vfd_issue my_mb_read_multi_reg(uint16_t slave, uint16_t addr, uint16_t count, uint16_t *buf) {
+    int result = mmodbus_readHoldingRegisters16i(slave, addr, count, buf);  // Assume multi-read API
+    return (result == 0) ? VFD_SUCCESS : VFD_ERROR_MODBUS_FAIL;
+}
 
 /* USER CODE END 4 */
 
