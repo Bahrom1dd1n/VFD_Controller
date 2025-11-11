@@ -203,7 +203,7 @@ MIT License - Use freely in commercial/personal projects.
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/Bahrom1dd1n/VFD_Controller/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/bahrom1dd1n/vfd-controller/discussions)
+- **Discussions**: [GitHub Discussions](https://github.com/Bahrom1dd1n/VFD_Controller/discussions)
 
 ## Credits
 
